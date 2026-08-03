@@ -18,8 +18,9 @@ export default function EditOrderPage() {
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
+    if (!id) return;
     (async () => {
-      const data = await getOrder(id);
+      const data = await getOrder(Array.isArray(id) ? id[0] : id);
       if (data) {
         setOrder(data);
         setName(data.name);
@@ -31,8 +32,9 @@ export default function EditOrderPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!id) return;
     startTransition(async () => {
-      await updateOrder(params.id, { name, whatsapp, notes });
+      await updateOrder(Array.isArray(id) ? id[0] : id, { name, whatsapp, notes });
       router.push('/admin/pesanan');
     });
   };

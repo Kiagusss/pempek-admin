@@ -10,7 +10,7 @@ interface ProductFormProps {
   onCancel: () => void;
 }
 
-export default function ProductForm({ categories, onSave, onCancel }: ProductFormProps) {
+export function ProductForm({ categories, onSave, onCancel }: ProductFormProps) {
   const [isPending, setIsPending] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -79,20 +79,9 @@ export default function ProductForm({ categories, onSave, onCancel }: ProductFor
     }
   };
 
-  const removeImage = (index: number, isPreview: boolean) => {
-    if (isPreview) {
-      setImagePreviews((prev) => prev.filter((_, i) => i !== index));
-      setImages((prev) => {
-        const newImages = [...prev];
-        const previewIndex = imagePreviews.findIndex((p) => p === prev[index]);
-        if (previewIndex !== -1) {
-          newImages.splice(previewIndex, 1);
-        }
-        return newImages;
-      });
-    } else {
-      setExistingImages((prev) => prev.filter((_, i) => i !== index));
-    }
+  const removeImage = (index: number) => {
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+    setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -247,7 +236,7 @@ export default function ProductForm({ categories, onSave, onCancel }: ProductFor
                 <img src={img} alt={`Gambar ${index + 1}`} className="w-full h-24 object-cover rounded-[var(--radius-md)]" />
                 <button
                   type="button"
-                  onClick={() => removeImage(index, false)}
+                  onClick={() => setExistingImages((prev) => prev.filter((_, i) => i !== index))}
                   className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
                 >
                   ×
@@ -260,7 +249,7 @@ export default function ProductForm({ categories, onSave, onCancel }: ProductFor
                 <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-24 object-cover rounded-[var(--radius-md)]" />
                 <button
                   type="button"
-                  onClick={() => removeImage(index, true)}
+                  onClick={() => removeImage(index)}
                   className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
                 >
                   ×

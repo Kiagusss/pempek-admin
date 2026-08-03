@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { Order } from '@/types';
 
 // Modal component for Order Editing
-const EditOrderModal = ({ order, isOpen, onClose, onSave }) => {
+const EditOrderModal = ({ order, isOpen, onClose, onSave }: { order: Order, isOpen: boolean, onClose: () => void, onSave: (id: string, data: any) => void }) => {
   const [formData, setFormData] = useState({
     name: order.name,
     whatsapp: order.whatsapp,

@@ -40,7 +40,7 @@ export default function Navbar() {
             className="text-xl font-bold tracking-tight text-[var(--color-ink)] sm:text-2xl"
             aria-label={SITE_NAME}
           >
-            Pempek<span className="text-[var(--color-accent)]">.</span>
+            Pempek Depok<span className="text-[var(--color-accent)]">.</span>
           </Link>
 
           {/* Desktop links — center */}
