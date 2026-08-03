@@ -1,0 +1,95 @@
+/* Hallmark · genre: editorial · macrostructure: Split Studio · theme: Garden (adapted)
+ * tone: luxury · anchor hue: warm-amber · nav: N9 · footer: Ft1
+ * pre-emit critique: P4 H4 E4 S4 R5 V4
+ *
+ * Garden theme adapted to user spec: white-dominant paper,
+ * warm amber (#F59E0B) accent, Plus Jakarta Sans display + body.
+ * Three diversification axes: light paper / rounded-sans / warm accent.
+ */
+
+:root {
+  /* ─── Paper ─────────────────────────────────────────── */
+  --color-paper:        oklch(100% 0 0);          /* #FFFFFF */
+  --color-paper-2:      oklch(97.8% 0.002 90);    /* #F8F8F8 */
+  --color-paper-3:      oklch(94.5% 0.003 90);    /* #ECECEC */
+
+  /* ─── Ink ───────────────────────────────────────────── */
+  --color-ink:          oklch(17% 0.02 260);       /* #111827 */
+  --color-ink-2:        oklch(40% 0.01 260);       /* mid-gray text */
+  --color-ink-3:        oklch(55% 0.008 260);      /* muted text */
+
+  /* ─── Accent ────────────────────────────────────────── */
+  --color-accent:       oklch(78% 0.16 85);        /* ~#F59E0B amber */
+  --color-accent-hover: oklch(72% 0.16 85);        /* darker amber */
+  --color-accent-light: oklch(95% 0.04 85);        /* very light amber */
+  --color-accent-bg:    oklch(97% 0.02 85);        /* subtle amber tint */
+
+  /* ─── Semantic ──────────────────────────────────────── */
+  --color-success:      oklch(55% 0.18 145);       /* #16A34A */
+  --color-error:        oklch(55% 0.2 25);
+  --color-focus:        oklch(78% 0.16 85);        /* matches accent */
+
+  /* ─── Typography ────────────────────────────────────── */
+  --font-display:       var(--font-plus-jakarta);
+  --font-body:          var(--font-plus-jakarta);
+
+  --text-display:       clamp(2.5rem, 5vw + 1rem, 4rem);
+  --text-display-s:     clamp(2rem, 3vw + 0.5rem, 3rem);
+  --text-4xl:           clamp(1.75rem, 2vw + 0.5rem, 2.25rem);
+  --text-3xl:           1.875rem;
+  --text-2xl:           1.5rem;
+  --text-xl:            1.25rem;
+  --text-lg:            1.125rem;
+  --text-base:          1rem;
+  --text-sm:            0.875rem;
+  --text-xs:            0.75rem;
+
+  /* ─── Spacing (4pt scale) ───────────────────────────── */
+  --space-xs:  0.25rem;   /* 4px */
+  --space-sm:  0.5rem;    /* 8px */
+  --space-md:  1rem;      /* 16px */
+  --space-lg:  1.5rem;    /* 24px */
+  --space-xl:  2rem;      /* 32px */
+  --space-2xl: 3rem;      /* 48px */
+  --space-3xl: 4rem;      /* 64px */
+  --space-4xl: 6rem;      /* 96px */
+  --space-5xl: 8rem;      /* 128px */
+
+  /* ─── Radius ────────────────────────────────────────── */
+  --radius-sm:  0.375rem;
+  --radius-md:  0.5rem;
+  --radius-lg:  0.75rem;
+  --radius-xl:  1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* ─── Easing ────────────────────────────────────────── */
+  --ease-out:    cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in:     cubic-bezier(0.55, 0, 1, 0.45);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* ─── Duration ──────────────────────────────────────── */
+  --dur-fast:   120ms;
+  --dur-normal: 200ms;
+  --dur-slow:   350ms;
+  --dur-enter:  500ms;
+
+  /* ─── Rule ──────────────────────────────────────────── */
+  --rule-hairline: 1px solid var(--color-paper-3);
+  --rule-accent:   2px solid var(--color-accent);
+
+  /* ─── Shadow ────────────────────────────────────────── */
+  --shadow-sm:  0 1px 2px oklch(0% 0 0 / 0.04);
+  --shadow-md:  0 4px 12px oklch(0% 0 0 / 0.06);
+  --shadow-lg:  0 8px 24px oklch(0% 0 0 / 0.08);
+  --shadow-xl:  0 12px 40px oklch(0% 0 0 / 0.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast:   0ms;
+    --dur-normal: 0ms;
+    --dur-slow:   150ms;
+    --dur-enter:  150ms;
+  }
+}
