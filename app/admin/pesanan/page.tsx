@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState, useTransition } from 'react';
-import Link from 'next/link';
 import AdminShell from '@/components/admin/AdminShell';
 import PageHeader from '@/components/admin/PageHeader';
 import { getOrders, updateOrder, deleteOrder } from '@/lib/actions/orders';
 import type { Order } from '@/types';
 import { CURRENCY_FORMAT } from '@/constants';
+import EditOrderModal from '@/components/admin/EditOrderModal';
 
 const statusLabels: Record<Order['status'], string> = {
   pending: 'Menunggu',
@@ -20,6 +20,8 @@ export default function OrdersAdminPage() {
   const [isPending, startTransition] = useTransition();
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   const loadData = () => {
     startTransition(async () => {
@@ -46,6 +48,22 @@ export default function OrdersAdminPage() {
         loadData();
       });
     }
+  };
+
+  const handleEditClick = (order: Order) => {
+    setSelectedOrder(order);
+    setEditModalOpen(true);
+  };
+
+  const handleModalSave = async (id: string, data: any) => {
+    await updateOrder(id, data);
+    setEditModalOpen(false);
+    loadData();
+  };
+
+  const handleModalClose = () => {
+    setEditModalOpen(false);
+    setSelectedOrder(null);
   };
 
   const filteredOrders = orders.filter((o) => {
@@ -169,11 +187,12 @@ export default function OrdersAdminPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
-                        <Link href={`/admin/pesanan/${order.id}`}>
-                          <button className="rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-2 py-1 text-xs text-[var(--color-accent)] hover:bg-[var(--color-accent-light)]">
-                            Edit
-                          </button>
-                        </Link>
+                        <button
+                          onClick={() => handleEditClick(order)}
+                          className="rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-2 py-1 text-xs text-[var(--color-accent)] hover:bg-[var(--color-accent-light)]"
+                        >
+                          Edit
+                        </button>
                         <button
                           onClick={() => handleDelete(order.id)}
                           className="rounded-[var(--radius-md)] border border-[var(--color-paper-3)] p-2 hover:border-red-500 hover:text-red-500 transition-all"
@@ -190,6 +209,14 @@ export default function OrdersAdminPage() {
           </tbody>
         </table>
       </div>
+      {selectedOrder && (
+        <EditOrderModal
+          order={selectedOrder}
+          isOpen={editModalOpen}
+          onClose={handleModalClose}
+          onSave={handleModalSave}
+        />
+      )}
     </AdminShell>
   );
 }

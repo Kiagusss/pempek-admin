@@ -3,8 +3,9 @@
 import { useEffect, useState, useTransition } from 'react';
 import AdminShell from '@/components/admin/AdminShell';
 import PageHeader from '@/components/admin/PageHeader';
-import Button from '@/components/ui/Button';
+import ImageUpload from '@/components/admin/ImageUpload';
 import Badge from '@/components/ui/Badge';
+import Button from '@/components/ui/Button';
 import { getProducts, createProduct, updateProduct, deleteProduct } from '@/lib/actions/products';
 import { getCategories } from '@/lib/actions/categories';
 import type { Product, Category } from '@/types';
@@ -422,13 +423,10 @@ export default function ProductsAdminPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-[var(--color-ink)] mb-1">Gambar Thumbnail</label>
-                <input
-                  type="text"
-                  required
+                <ImageUpload
+                  label="Gambar Produk"
                   value={thumbnail}
-                  onChange={(e) => setThumbnail(e.target.value)}
-                  className="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm focus-visible:outline-[var(--color-focus)]"
+                  onChange={(url) => setThumbnail(url)}
                 />
               </div>
 

@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from 'react';
 import AdminShell from '@/components/admin/AdminShell';
 import PageHeader from '@/components/admin/PageHeader';
 import Button from '@/components/ui/Button';
+import ImageUpload from '@/components/admin/ImageUpload';
 import { getSEOSettings, updateSEOSettings } from '@/lib/actions/seo';
 
 export default function SEOAdminPage() {
@@ -105,22 +106,20 @@ export default function SEOAdminPage() {
           <div className="grid gap-6 sm:grid-cols-2">
             <div>
               <label className="block text-sm font-semibold text-[var(--color-ink)] mb-1">URL OG Image (Social Share Image)</label>
-              <input
-                type="text"
-                required
+              <ImageUpload
                 value={ogImage}
-                onChange={(e) => setOgImage(e.target.value)}
-                className="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm focus-visible:outline-[var(--color-focus)]"
+                onChange={setOgImage}
+                bucket="images"
+                folder="seo"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-[var(--color-ink)] mb-1">Favicon URL</label>
-              <input
-                type="text"
-                required
+              <label className="block text-sm font-semibold text-[var(--color-ink)] mb-1">Favicon</label>
+              <ImageUpload
                 value={favicon}
-                onChange={(e) => setFavicon(e.target.value)}
-                className="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm focus-visible:outline-[var(--color-focus)]"
+                onChange={setFavicon}
+                bucket="images"
+                folder="seo"
               />
             </div>
           </div>

@@ -6,6 +6,7 @@ import PageHeader from '@/components/admin/PageHeader';
 import Button from '@/components/ui/Button';
 import { getGallery, createGalleryItem, updateGalleryItem, deleteGalleryItem } from '@/lib/actions/gallery';
 import type { GalleryItem } from '@/types';
+import ImageUpload from '@/components/admin/ImageUpload';
 
 export default function GalleryAdminPage() {
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
@@ -14,7 +15,7 @@ export default function GalleryAdminPage() {
   const [editItem, setEditItem] = useState<GalleryItem | null>(null);
 
   // Form states
-  const [images, setImages] = useState('/images/hero-pempek.png');
+  const [imageUrl, setImageUrl] = useState('/images/hero-pempek.png');
   const [caption, setCaption] = useState('');
   const [category, setCategory] = useState('Pempek');
 
@@ -31,7 +32,7 @@ export default function GalleryAdminPage() {
 
   const openAddModal = () => {
     setEditItem(null);
-    setImages('/images/hero-pempek.png');
+    setImageUrl('/images/hero-pempek.png');
     setCaption('');
     setCategory('Pempek');
     setIsOpen(true);
@@ -39,7 +40,7 @@ export default function GalleryAdminPage() {
 
   const openEditModal = (item: GalleryItem) => {
     setEditItem(item);
-    setImages(item.images[0] || '/images/hero-pempek.png');
+    setImageUrl(item.images[0] || '/images/hero-pempek.png');
     setCaption(item.caption);
     setCategory(item.category);
     setIsOpen(true);
@@ -47,7 +48,7 @@ export default function GalleryAdminPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { images: [images], caption, category };
+    const payload = { images: [imageUrl], caption, category };
 
     startTransition(async () => {
       if (editItem) {
@@ -146,13 +147,12 @@ export default function GalleryAdminPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-[var(--color-ink)] mb-1">URL Gambar</label>
-                <input
-                  type="text"
-                  required
-                  value={images}
-                  onChange={(e) => setImages(e.target.value)}
-                  className="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm focus-visible:outline-[var(--color-focus)]"
+                <label className="block text-sm font-semibold text-[var(--color-ink)] mb-1">Gambar</label>
+                <ImageUpload
+                  value={imageUrl}
+                  onChange={setImageUrl}
+                  bucket="images"
+                  folder="gallery"
                 />
               </div>
 

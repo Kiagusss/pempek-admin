@@ -7,6 +7,7 @@ import PageHeader from '@/components/admin/PageHeader';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import { getArticles, createArticle, updateArticle, deleteArticle } from '@/lib/actions/articles';
+import ImageUpload from '@/components/admin/ImageUpload';
 import type { Article } from '@/types';
 
 export default function ArticlesAdminPage() {
@@ -254,12 +255,11 @@ export default function ArticlesAdminPage() {
 
               <div>
                 <label className="block text-sm font-semibold text-[var(--color-ink)] mb-1">Gambar Artikel</label>
-                <input
-                  type="text"
-                  required
+                <ImageUpload
                   value={thumbnail}
-                  onChange={(e) => setThumbnail(e.target.value)}
-                  className="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm focus-visible:outline-[var(--color-focus)]"
+                  onChange={setThumbnail}
+                  bucket="images"
+                  folder="articles"
                 />
               </div>
 

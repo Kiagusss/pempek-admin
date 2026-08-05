@@ -6,6 +6,7 @@ import PageHeader from '@/components/admin/PageHeader';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
 import { getBanners, createBanner, updateBanner, deleteBanner } from '@/lib/actions/banners';
+import ImageUpload from '@/components/admin/ImageUpload';
 import type { Banner } from '@/types';
 
 export default function BannerAdminPage() {
@@ -199,13 +200,12 @@ export default function BannerAdminPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
-                  <label className="block text-sm font-semibold text-[var(--color-ink)] mb-1">URL Gambar Latar Belakang</label>
-                  <input
-                    type="text"
-                    required
+                  <label className="block text-sm font-semibold text-[var(--color-ink)] mb-1">Gambar Latar Belakang</label>
+                  <ImageUpload
                     value={backgroundImage}
-                    onChange={(e) => setBackgroundImage(e.target.value)}
-                    className="w-full rounded-[var(--radius-md)] border border-[var(--color-paper-3)] px-3 py-2 text-sm focus-visible:outline-[var(--color-focus)]"
+                    onChange={setBackgroundImage}
+                    bucket="images"
+                    folder="banners"
                   />
                 </div>
               </div>
