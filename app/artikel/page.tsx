@@ -5,6 +5,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import Section, { SectionHeader } from '@/components/ui/Section';
 import { fetchArticles } from '@/lib/supabase';
+import { SITE_NAME, SITE_URL } from '@/lib/seo';
 
 export const metadata: Metadata = {
   title: 'Artikel & Tips Pempek Palembang — Resep, Sejarah, dan Cara Menyimpan',
@@ -21,14 +22,14 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'id_ID',
-    url: 'https://pempekpalembang.com/artikel',
-    siteName: 'Pempek Palembang',
+    url: `${SITE_URL}/artikel`,
+    siteName: SITE_NAME,
     title: 'Artikel & Tips Pempek Palembang',
     description:
       'Resep, sejarah, dan tips seputar pempek Palembang dari dapur kami.',
   },
   alternates: {
-    canonical: 'https://pempekpalembang.com/artikel',
+    canonical: `${SITE_URL}/artikel`,
   },
 };
 

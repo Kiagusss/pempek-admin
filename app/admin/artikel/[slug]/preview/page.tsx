@@ -5,6 +5,7 @@ import AdminShell from '@/components/admin/AdminShell';
 import PageHeader from '@/components/admin/PageHeader';
 import Badge from '@/components/ui/Badge';
 import { fetchArticleBySlug } from '@/lib/supabase';
+import { SITE_URL } from '@/lib/seo';
 import type { Article } from '@/types';
 
 interface Props {
@@ -25,7 +26,7 @@ export default async function ArticleSeoPreviewPage({ params }: Props) {
 
   const seoTitle = article.seoTitle || article.title;
   const seoDescription = article.seoDescription || article.content.slice(0, 160).replace(/<[^>]*>/g, '');
-  const url = `https://pempekpalembang.com/artikel/${article.slug}`;
+  const url = `${SITE_URL}/artikel/${article.slug}`;
   const image = article.thumbnail || '/images/hero-pempek.png';
   const keywords = article.metaKeywords?.split(',').map(k => k.trim()) || ['pempek', 'artikel', article.category.toLowerCase()];
 

@@ -210,3 +210,20 @@ CREATE TRIGGER trg_products_updated  BEFORE UPDATE ON public.products  FOR EACH 
 CREATE TRIGGER trg_articles_updated  BEFORE UPDATE ON public.articles  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER trg_settings_updated  BEFORE UPDATE ON public.settings  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER trg_seo_updated       BEFORE UPDATE ON public.seo       FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+-- ─── Decrement product stock atomically (dipakai saat order dibuat) ──
+CREATE OR REPLACE FUNCTION decrement_stock(p_product_id BIGINT, p_qty INT)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE updated_rows INT;
+BEGIN
+  UPDATE public.products
+     SET stock = GREATEST(stock - p_qty, 0)
+   WHERE id = p_product_id AND stock >= p_qty;
+  GET DIAGNOSTICS updated_rows = ROW_COUNT;
+  RETURN updated_rows > 0;
+END;
+$$;

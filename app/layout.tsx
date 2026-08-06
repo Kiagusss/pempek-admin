@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans } from 'next/font/google';
+import { SITE_NAME, SITE_URL, DEFAULT_SEO } from '@/lib/seo';
 import './globals.css';
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -11,42 +12,40 @@ const plusJakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Pempek Palembang — Pempek Asli Palembang, Lezat & Fresh Setiap Hari',
-    template: '%s | Pempek Palembang',
+    default: DEFAULT_SEO.metaTitle,
+    template: `%s | ${SITE_NAME}`,
   },
-  description:
-    'Pempek asli Palembang dibuat fresh setiap hari dari ikan tenggiri pilihan dengan resep turun-temurun. Pesan sekarang via WhatsApp — pengiriman cepat ke seluruh Indonesia.',
-  keywords: [
-    'pempek palembang',
-    'pempek asli',
-    'pempek kapal selam',
-    'pempek frozen',
-    'makanan khas palembang',
-    'pempek online',
-  ],
-  authors: [{ name: 'Pempek Palembang' }],
-  creator: 'Pempek Palembang',
+  description: DEFAULT_SEO.metaDescription,
+  keywords: DEFAULT_SEO.keywords.split(',').map((k) => k.trim()),
+  authors: [{ name: SITE_NAME }],
+  creator: SITE_NAME,
+  verification: DEFAULT_SEO.googleVerification
+    ? { google: DEFAULT_SEO.googleVerification }
+    : undefined,
   openGraph: {
     type: 'website',
     locale: 'id_ID',
-    url: 'https://pempekpalembang.com',
-    siteName: 'Pempek Palembang',
-    title: 'Pempek Palembang — Pempek Asli Palembang, Lezat & Fresh Setiap Hari',
-    description:
-      'Pempek asli Palembang dibuat fresh setiap hari dari ikan tenggiri pilihan. Pesan via WhatsApp.',
+    url: DEFAULT_SEO.canonicalUrl,
+    siteName: SITE_NAME,
+    title: DEFAULT_SEO.metaTitle,
+    description: DEFAULT_SEO.metaDescription,
+    images: [{ url: DEFAULT_SEO.ogImage, width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Pempek Palembang — Pempek Asli Palembang',
-    description:
-      'Pempek asli Palembang dibuat fresh setiap hari dari ikan tenggiri pilihan.',
+    title: DEFAULT_SEO.metaTitle,
+    description: DEFAULT_SEO.metaDescription,
+    images: [DEFAULT_SEO.ogImage],
   },
   robots: {
-    index: true,
-    follow: true,
+    index: DEFAULT_SEO.robots.includes('index'),
+    follow: DEFAULT_SEO.robots.includes('follow'),
   },
   alternates: {
-    canonical: 'https://pempekpalembang.com',
+    canonical: DEFAULT_SEO.canonicalUrl,
+  },
+  icons: {
+    icon: DEFAULT_SEO.favicon,
   },
 };
 

@@ -18,8 +18,6 @@ type CartItem = {
   thumbnail: string;
 };
 
-const CATEGORIES_TABS = ['Semua', 'Makanan', 'Minuman', 'Lainnya'];
-
 export default function POSPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -34,16 +32,18 @@ export default function POSPage() {
   const [message, setMessage] = useState<{ kind: 'success' | 'error'; text: string } | null>(null);
   const [showCart, setShowCart] = useState(false);
 
+  const loadProducts = async () => {
+    try {
+      const [prods, cats] = await Promise.all([getProducts(), getCategories()]);
+      setProducts(prods.filter((p) => p.status === 'active'));
+      setCategories(cats);
+    } catch (e) {
+      setMessage({ kind: 'error', text: 'Gagal memuat produk' });
+    }
+  };
+
   useEffect(() => {
-    (async () => {
-      try {
-        const [prods, cats] = await Promise.all([getProducts(), getCategories()]);
-        setProducts(prods.filter((p) => p.status === 'active'));
-        setCategories(cats);
-      } catch (e) {
-        setMessage({ kind: 'error', text: 'Gagal memuat produk' });
-      }
-    })();
+    loadProducts();
   }, []);
 
   const categoryNameById = useMemo(() => {
@@ -56,20 +56,27 @@ export default function POSPage() {
     const q = search.trim().toLowerCase();
     return products.filter((p) => {
       const matchesSearch = !q || p.name.toLowerCase().includes(q);
-      const catName = categoryNameById.get(p.categoryId) ?? '';
+      const catName = categoryNameById.get(p.categoryId);
       const matchesTab =
         activeTab === 'Semua' ||
-        (activeTab === 'Makanan' && /pempek|goreng|gorengan|makanan/i.test(catName)) ||
-        (activeTab === 'Minuman' && /minuman|drink/i.test(catName)) ||
-        (activeTab === 'Lainnya' && catName && !/pempek|gorengan|makanan|minuman|drink/i.test(catName));
+        (activeTab === 'Tanpa Kategori' ? !catName : catName === activeTab);
       return matchesSearch && matchesTab;
     });
   }, [products, search, activeTab, categoryNameById]);
 
+  // Produk tanpa kategori → tab "Tanpa Kategori" (hanya muncul jika ada)
+  const uncategorizedCount = products.filter((p) => !categoryNameById.get(p.categoryId)).length;
+  const tabs = useMemo(
+    () => ['Semua', ...categories.map((c) => c.name), ...(uncategorizedCount > 0 ? ['Tanpa Kategori'] : [])],
+    [categories, uncategorizedCount],
+  );
+
   const addToCart = (p: Product) => {
+    if (p.stock <= 0) return;
     setCart((prev) => {
       const existing = prev.find((i) => i.productId === p.id);
       if (existing) {
+        if (existing.quantity >= p.stock) return prev; // cap di stok
         return prev.map((i) => (i.productId === p.id ? { ...i, quantity: i.quantity + 1 } : i));
       }
       return [
@@ -90,7 +97,13 @@ export default function POSPage() {
   const updateQty = (productId: string, delta: number) => {
     setCart((prev) =>
       prev
-        .map((i) => (i.productId === productId ? { ...i, quantity: i.quantity + delta } : i))
+        .map((i) => {
+          if (i.productId !== productId) return i;
+          const next = i.quantity + delta;
+          const p = products.find((x) => x.id === productId);
+          const max = p ? p.stock : next;
+          return { ...i, quantity: Math.min(Math.max(next, 0), Math.max(max, 0)) };
+        })
         .filter((i) => i.quantity > 0),
     );
   };
@@ -115,6 +128,15 @@ export default function POSPage() {
       setMessage({ kind: 'error', text: 'Keranjang kosong' });
       return;
     }
+    // Validasi stok sebelum checkout
+    const soldOut = cart.find((i) => {
+      const p = products.find((x) => x.id === i.productId);
+      return p && p.stock < i.quantity;
+    });
+    if (soldOut) {
+      setMessage({ kind: 'error', text: `Stok ${soldOut.productName} tidak mencukupi` });
+      return;
+    }
     startTransition(async () => {
       try {
         await createOrder({
@@ -133,6 +155,7 @@ export default function POSPage() {
         setCustomer('');
         setWhatsapp('');
         setPaymentMethod('Tunai');
+        await loadProducts(); // refresh stok terbaru
       } catch (e) {
         setMessage({ kind: 'error', text: 'Gagal membuat pesanan' });
       }
@@ -141,7 +164,7 @@ export default function POSPage() {
 
   return (
     <AdminShell>
-      <div className="-m-5 sm:-m-8 flex h-[calc(100vh-4rem)] flex-col lg:flex-row">
+      <div className="-m-5 sm:-m-8 flex h-[calc(100dvh-7rem)] flex-col lg:h-[calc(100vh-4rem)] lg:flex-row">
         {/* Main — Sales Transaction */}
         <section className="relative flex flex-1 flex-col overflow-hidden border-r border-[var(--color-paper-3)] bg-[var(--color-paper-2)]">
           <header className="flex flex-col gap-3 border-b border-[var(--color-paper-3)] bg-white px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
@@ -182,7 +205,7 @@ export default function POSPage() {
 
           {/* Tabs */}
           <nav className="flex gap-2 overflow-x-auto border-b border-[var(--color-paper-3)] bg-white px-4 py-3 sm:px-6">
-            {CATEGORIES_TABS.map((tab) => (
+            {tabs.map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -193,7 +216,7 @@ export default function POSPage() {
                     : 'bg-[var(--color-paper-2)] text-[var(--color-ink-2)] hover:bg-[var(--color-paper-3)]',
                 ].join(' ')}
               >
-                {tab === 'Semua' ? 'All Product' : tab === 'Makanan' ? 'Foods' : tab === 'Minuman' ? 'Beverage' : 'Other'}
+                {tab}
               </button>
             ))}
           </nav>
@@ -240,6 +263,7 @@ export default function POSPage() {
                       <p className="text-[10px] text-[var(--color-ink-3)]">Stok: {p.stock}</p>
                       <QuantityInput
                         quantity={cartQty(p.id)}
+                        stock={p.stock}
                         onAdd={() => addToCart(p)}
                         onIncrement={() => updateQty(p.id, 1)}
                         onDecrement={() => updateQty(p.id, -1)}

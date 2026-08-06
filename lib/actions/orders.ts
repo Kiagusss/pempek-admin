@@ -42,6 +42,21 @@ export async function createOrder(order: {
   products: { productId: string; productName: string; quantity: number; price: number }[];
   notes?: string;
 }): Promise<Order> {
+  // Validasi stok cukup sebelum membuat order
+  const { data: products, error: fetchError } = await db()
+    .from('products')
+    .select('id, stock')
+    .in('id', order.products.map((p) => Number(p.productId)));
+  if (fetchError) throw fetchError;
+
+  const stockMap = new Map((products || []).map((p) => [String(p.id), Number(p.stock)]));
+  for (const item of order.products) {
+    const available = stockMap.get(item.productId) ?? 0;
+    if (item.quantity > available) {
+      throw new Error(`Stok ${item.productName} tidak mencukupi (tersisa ${available})`);
+    }
+  }
+
   const { data: inserted, error } = await db()
     .from('orders')
     .insert({
@@ -54,7 +69,21 @@ export async function createOrder(order: {
     .select()
     .single();
   if (error) throw error;
+
+  // Kurangi stok produk secara atomik (guard di DB cegah oversell)
+  for (const item of order.products) {
+    const { data: ok, error: stockError } = await db().rpc('decrement_stock', {
+      p_product_id: Number(item.productId),
+      p_qty: item.quantity,
+    });
+    if (stockError || ok === false) {
+      throw new Error(`Gagal mengurangi stok ${item.productName}`);
+    }
+  }
+
   revalidatePath('/admin/pesanan');
+  revalidatePath('/admin/produk');
+  revalidatePath('/');
   return mapRow(inserted as Row);
 }
 

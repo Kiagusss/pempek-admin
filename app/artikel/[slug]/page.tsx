@@ -6,6 +6,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import Section from '@/components/ui/Section';
 import { fetchArticles, fetchArticleBySlug, fetchRelatedArticles } from '@/lib/supabase';
+import { SITE_NAME, SITE_URL } from '@/lib/seo';
 import type { Article } from '@/types/article';
 
 interface Props {
@@ -22,8 +23,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   
   const title = article.seoTitle || article.title;
   const description = article.seoDescription || article.content.slice(0, 160);
-  const url = `https://pempekpalembang.com/artikel/${article.slug}`;
-  const image = article.thumbnail || '/images/hero-pempek.png';
+  const url = `${SITE_URL}/artikel/${article.slug}`;
+  const image = article.thumbnail || `${SITE_URL}/images/hero-pempek.png`;
   
   return {
     title,
@@ -33,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'article',
       locale: 'id_ID',
       url,
-      siteName: 'Pempek Palembang',
+      siteName: SITE_NAME,
       title,
       description,
       images: [{ url: image, width: 1200, height: 630, alt: article.title }],

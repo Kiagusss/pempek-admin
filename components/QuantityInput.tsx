@@ -1,22 +1,24 @@
 type QuantityInputProps = {
   quantity: number; // quantity item saat ini di keranjang (0 = belum ada)
+  stock: number;
   onAdd: () => void;
   onIncrement: () => void;
   onDecrement: () => void;
 };
 
-export default function QuantityInput({ quantity, onAdd, onIncrement, onDecrement }: QuantityInputProps) {
+export default function QuantityInput({ quantity, stock, onAdd, onIncrement, onDecrement }: QuantityInputProps) {
   if (quantity === 0) {
     return (
       <button
         onClick={onAdd}
-        className="mt-1 flex w-full items-center justify-center gap-1 rounded-[var(--radius-md)] bg-[var(--color-accent)] px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[var(--color-accent-dark)]"
+        disabled={stock <= 0}
+        className="mt-1 flex w-full items-center justify-center gap-1 rounded-[var(--radius-md)] bg-[var(--color-accent)] px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-[var(--color-accent-hover)] disabled:cursor-not-allowed disabled:bg-[var(--color-paper-3)] disabled:text-[var(--color-ink-3)]"
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
           <path d="M12 5v14" />
           <path d="M5 12h14" />
         </svg>
-        Tambah
+        {stock <= 0 ? 'Habis' : 'Tambah'}
       </button>
     );
   }
@@ -34,7 +36,8 @@ export default function QuantityInput({ quantity, onAdd, onIncrement, onDecremen
       <button
         onClick={onIncrement}
         aria-label="Tambah"
-        className="flex h-6 w-6 items-center justify-center rounded-[var(--radius-sm)] text-sm font-bold text-[var(--color-ink-2)] transition-colors hover:bg-white"
+        disabled={quantity >= stock}
+        className="flex h-6 w-6 items-center justify-center rounded-[var(--radius-sm)] text-sm font-bold text-[var(--color-ink-2)] transition-colors hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
       >
         +
       </button>
