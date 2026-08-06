@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import AdminChat from '@/components/admin/AdminChat';
 
 export const metadata: Metadata = {
   title: {
@@ -13,5 +14,10 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <AdminChat />
+    </>
+  );
 }
