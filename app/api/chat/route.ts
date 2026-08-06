@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { buildSiteContext } from '@/lib/chat/context';
+import { TOOLS, executeTool } from '@/lib/chat/tools';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -18,13 +19,20 @@ Jika jawaban tidak ada di data situs, katakan jujur bahwa kamu tidak tahu dan ar
 const INTERNAL_SYSTEM = `Kamu adalah asisten internal admin situs Pempek Palembang.
 Kamu bisa membaca SELURUH data situs (produk, stok, paket, artikel, FAQ, testimoni, banner, galeri, kategori, pesanan, pengaturan, SEO) yang disertakan di bawah.
 Tugasmu membantu admin: menganalisis penjualan, mengecek stok, merangkum pesanan, memberi saran produk/harga, dll.
+Kamu JUGA bisa mengubah database via tools: membuat pesanan, mengubah status pesanan, mengubah stok produk.
+Aturan penggunaan tools:
+- Panggil tool hanya jika data yang diperlukan (mis. nama produk) sudah pasti dan admin sudah mengonfirmasi niatnya.
+- Sebelum membuat pesanan, pastikan nama produk persis dengan yang ada di data.
+- Setelah tool selesai, sampaikan hasilnya ke admin dengan ringkas.
 Gunakan Bahasa Indonesia yang jelas dan ringkas.
 JANGAN pernah menampilkan data pribadi pelanggan (nama lengkap, alamat, nomor WhatsApp) secara mentah — cukup ringkasan/statistik.
 Jika diminta sesuatu di luar data yang tersedia, jawab dengan jujur.`;
 
 interface ChatMessage {
-  role: 'system' | 'user' | 'assistant';
+  role: 'system' | 'user' | 'assistant' | 'tool';
   content: string;
+  tool_calls?: unknown;
+  tool_call_id?: string;
 }
 
 export async function POST(req: NextRequest) {
@@ -62,52 +70,89 @@ export async function POST(req: NextRequest) {
 
   const messages: ChatMessage[] = [{ role: 'system', content: system }, ...body.messages];
 
-  try {
+  // Parsing respons yang bisa berupa JSON biasa atau SSE (gateway tertentu).
+  async function parseCompletion(text: string) {
+    try {
+      return JSON.parse(text) as {
+        choices?: { message?: { role?: string; content?: string; tool_calls?: unknown } }[];
+      };
+    } catch {
+      const lines = text.split('\n').filter((l) => l.startsWith('data:'));
+      for (const line of lines.reverse()) {
+        const chunk = line.slice(5).trim();
+        if (!chunk || chunk === '[DONE]') continue;
+        try {
+          return JSON.parse(chunk) as {
+            choices?: { message?: { role?: string; content?: string; tool_calls?: unknown } }[];
+          };
+        } catch {
+          // lanjut ke baris data: sebelumnya
+        }
+      }
+      return null;
+    }
+  }
+
+  async function callModel(msgs: ChatMessage[], withTools: boolean) {
+    const body: Record<string, unknown> = {
+      model: MODEL,
+      messages: msgs,
+      temperature: 0.4,
+      max_tokens: 1024,
+      stream: false,
+    };
+    if (withTools) body.tools = TOOLS;
     const upstream = await fetch(`${BASE_URL}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${API_KEY}`,
       },
-      body: JSON.stringify({
-        model: MODEL,
-        messages,
-        temperature: 0.4,
-        max_tokens: 1024,
-        stream: false,
-      }),
+      body: JSON.stringify(body),
       cache: 'no-store',
     });
-
     if (!upstream.ok) {
       const detail = await upstream.text().catch(() => '');
-      return NextResponse.json(
-        { error: `API error ${upstream.status}: ${detail.slice(0, 300)}` },
-        { status: 502 },
-      );
+      throw new Error(`API error ${upstream.status}: ${detail.slice(0, 300)}`);
     }
+    const parsed = await parseCompletion(await upstream.text());
+    return parsed?.choices?.[0]?.message ?? null;
+  }
 
-    // Beberapa gateway mengembalikan SSE (diawali 'data:') walau diminta JSON biasa.
-    const raw = await upstream.text();
-    let data: { choices?: { message?: { content?: string } }[] } | null = null;
-    try {
-      data = JSON.parse(raw);
-    } catch {
-      const lines = raw.split('\n').filter((l) => l.startsWith('data:'));
-      for (const line of lines.reverse()) {
-        const chunk = line.slice(5).trim();
-        if (!chunk || chunk === '[DONE]') continue;
+  try {
+    const msg = await callModel(messages, isAdmin);
+
+    // Agent loop: jika model memanggil tool, eksekusi lalu lanjutkan percakapan.
+    if (isAdmin && msg && Array.isArray(msg.tool_calls) && msg.tool_calls.length > 0) {
+      const toolMessages: ChatMessage[] = [
+        ...messages,
+        {
+          role: msg.role === 'assistant' ? 'assistant' : 'assistant',
+          content: msg.content ?? '',
+          tool_calls: msg.tool_calls as never,
+        } as ChatMessage,
+      ];
+      for (const call of msg.tool_calls as { id?: string; function?: { name?: string; arguments?: string } }[]) {
+        const fnName = call.function?.name ?? '';
+        let args: unknown = {};
         try {
-          data = JSON.parse(chunk);
-          break;
+          args = JSON.parse(call.function?.arguments ?? '{}');
         } catch {
-          // lanjut ke baris data: sebelumnya
+          args = { raw: call.function?.arguments };
         }
+        const { ok, result } = await executeTool(fnName, args);
+        toolMessages.push({
+          role: 'tool',
+          tool_call_id: call.id ?? '',
+          content: ok ? result : `ERROR: ${result}`,
+        } as ChatMessage);
       }
+      const final = await callModel(toolMessages, true);
+      const reply = final?.content?.trim() || 'Selesai.';
+      return NextResponse.json({ reply });
     }
 
-    const reply = data?.choices?.[0]?.message?.content?.trim() || 'Maaf, tidak ada jawaban.';
-
+    const reply = msg?.content?.trim() || 'Maaf, tidak ada jawaban.';
     return NextResponse.json({ reply });
   } catch (err) {
     return NextResponse.json(
