@@ -7,9 +7,9 @@ export const maxDuration = 60;
 
 const PIN = process.env.CHAT_ADMIN_PIN;
 const API_KEY = process.env.DEEPSEEK_API_KEY;
-// Endpoint & model dapat diubah lewat env (default: endpoint custom OpenCode/DeepSeek V4 Flash Free)
+// Endpoint & model dapat diubah lewat env (default: endpoint 9Router + combo "gratis")
 const BASE_URL = (process.env.CHAT_API_BASE || 'https://rzgwipd.abc-tunnel.us/v1').replace(/\/$/, '');
-const MODEL = process.env.CHAT_MODEL || 'oc/deepseek-v4-flash-free';
+const MODEL = process.env.CHAT_MODEL || 'gratis';
 
 const PUBLIC_SYSTEM = `Kamu adalah asisten virtual "Dia Pempek" untuk situs Pempek Palembang (pempek-depok.vercel.app).
 Kamu menjawab pertanyaan pengunjung seputar menu, harga, paket, cara pemesanan, pengiriman, artikel, dan FAQ.
