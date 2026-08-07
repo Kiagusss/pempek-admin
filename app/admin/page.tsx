@@ -13,7 +13,7 @@ import Link from 'next/link';
 type TimeRange = 'today' | 'month' | 'year';
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats>({ orderCount: 0, productCount: 0, totalRevenue: 0 });
+  const [stats, setStats] = useState<DashboardStats>({ orderCount: 0, productCount: 0, totalRevenue: 0, visitorCount: 0 });
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
@@ -86,6 +86,11 @@ export default function AdminDashboard() {
           label={`Pendapatan Selesai`}
           value={CURRENCY_FORMAT.format(stats.totalRevenue)}
           icon={<span>💰</span>}
+        />
+        <StatsCard
+          label="Pengunjung"
+          value={stats.visitorCount}
+          icon={<span>👁️</span>}
         />
       </div>
 

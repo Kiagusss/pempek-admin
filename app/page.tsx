@@ -10,6 +10,7 @@ import Testimoni from '@/components/sections/Testimoni';
 import FAQ from '@/components/sections/FAQ';
 import Artikel from '@/components/sections/Artikel';
 import CTASection from '@/components/sections/CTASection';
+import VisitorTracker from '@/components/VisitorTracker';
 import { sbGet } from '@/lib/actions/supabase-crud';
 
 async function getData() {
@@ -44,6 +45,7 @@ export default async function Home() {
         <CTASection />
       </main>
       <Footer />
+      <VisitorTracker path="/" />
     </>
   );
 }

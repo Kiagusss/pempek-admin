@@ -134,7 +134,7 @@ export async function getDashboardStats(range: 'today' | 'month' | 'year' = 'mon
 
   if (error) {
     console.error(error);
-    return { orderCount: 0, productCount: 0, totalRevenue: 0 };
+    return { orderCount: 0, productCount: 0, totalRevenue: 0, visitorCount: 0 };
   }
 
   const completedOrders = data.filter((o) => o.status === 'completed');
@@ -151,9 +151,15 @@ export async function getDashboardStats(range: 'today' | 'month' | 'year' = 'mon
     .from('products')
     .select('id', { count: 'exact', head: true });
 
+  // Total kunjungan landing page (semua waktu; range tidak relevan utk MVP)
+  const { count: visitorCount } = await db()
+    .from('page_views')
+    .select('id', { count: 'exact', head: true });
+
   return {
     orderCount: data.length,
     productCount: productCount || 0,
     totalRevenue: totalRevenue,
+    visitorCount: visitorCount || 0,
   };
 }

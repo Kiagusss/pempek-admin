@@ -105,6 +105,7 @@ export interface Order {
   orderCount: number;
   productCount: number;
   totalRevenue: number;
+  visitorCount: number;
   }
 
 export interface OrderProduct {
