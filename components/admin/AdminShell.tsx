@@ -181,10 +181,21 @@ export default function AdminShell({ children }: AdminShellProps) {
 
           {/* Right side */}
           <div className="flex items-center gap-3">
-            <span className="text-sm text-[var(--color-ink-2)]">Admin</span>
+            <span className="hidden text-sm text-[var(--color-ink-2)] sm:inline">Admin</span>
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-accent)] text-sm font-bold text-white">
               A
             </div>
+            <form action={logout}>
+              <button
+                type="submit"
+                aria-label="Keluar"
+                title="Keluar"
+                className="flex h-8 items-center gap-1.5 rounded-[var(--radius-lg)] px-2.5 text-sm text-[var(--color-ink-3)] transition-colors hover:bg-[var(--color-paper-2)] hover:text-[var(--color-danger)]"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <span className="hidden sm:inline">Keluar</span>
+              </button>
+            </form>
           </div>
         </header>
 
