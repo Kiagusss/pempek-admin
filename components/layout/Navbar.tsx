@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { NAV_LINKS, WHATSAPP_LINK, SITE_NAME } from '@/constants';
+import { useCart } from '@/components/CartContext';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { count, openCart } = useCart();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -59,6 +61,24 @@ export default function Navbar() {
 
           {/* CTA — hard right (N9) */}
           <div className="flex items-center gap-3">
+            {/* Cart button */}
+            <button
+              onClick={openCart}
+              className="relative flex h-10 w-10 items-center justify-center rounded-[var(--radius-lg)] text-[var(--color-ink)] transition-colors hover:bg-[var(--color-paper-2)]"
+              aria-label={`Buka keranjang (${count} item)`}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="8" cy="21" r="1" />
+                <circle cx="19" cy="21" r="1" />
+                <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+              </svg>
+              {count > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--color-accent)] px-1 text-[10px] font-bold text-white">
+                  {count}
+                </span>
+              )}
+            </button>
+
             <a
               href={WHATSAPP_LINK}
               target="_blank"

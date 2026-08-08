@@ -1,10 +1,23 @@
+'use client';
+
 import Section, { SectionHeader } from '@/components/ui/Section';
 import Badge from '@/components/ui/Badge';
-import { CURRENCY_FORMAT, WHATSAPP_NUMBER } from '@/constants';
+import { CURRENCY_FORMAT } from '@/constants';
 import type { Package } from '@/types';
+import type { CartItemInput } from '@/components/CartContext';
+
+// Kirim event add-to-cart via window (event bus).
+// Tidak bergantung pada React context — aman walau komponen di-SSR.
+function addToCart(pkg: Package) {
+  const item: CartItemInput = {
+    id: `pkg-${pkg.id}`,
+    name: pkg.name,
+    price: pkg.price,
+  };
+  window.dispatchEvent(new CustomEvent('pempek:add-to-cart', { detail: item }));
+}
 
 export default function PaketHemat({ packages }: { packages: Package[] }) {
-  const featured = packages.filter((p) => p.isFeatured);
   return (
     <Section>
       <SectionHeader
@@ -14,9 +27,6 @@ export default function PaketHemat({ packages }: { packages: Package[] }) {
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {packages.map((pkg, index) => {
-          const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-            `Halo, saya ingin memesan ${pkg.name} (${CURRENCY_FORMAT.format(pkg.price)})`
-          )}`;
           const isFeatured = index === 0;
           const rawItems: unknown = typeof pkg.items === 'string' ? JSON.parse(pkg.items) : pkg.items;
           const items: { name: string; quantity: number }[] = Array.isArray(rawItems) ? rawItems : [];
@@ -75,10 +85,8 @@ export default function PaketHemat({ packages }: { packages: Package[] }) {
                 )}
               </div>
 
-              <a
-                href={waLink}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={() => addToCart(pkg)}
                 className={[
                   'mt-5 flex w-full items-center justify-center gap-2 rounded-[var(--radius-xl)] py-3 text-sm font-semibold transition-all',
                   `duration-[var(--dur-normal)]`,
@@ -88,8 +96,13 @@ export default function PaketHemat({ packages }: { packages: Package[] }) {
                     : 'border border-[var(--color-paper-3)] text-[var(--color-ink)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]',
                 ].join(' ')}
               >
-                Pesan Paket
-              </a>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="8" cy="21" r="1" />
+                  <circle cx="19" cy="21" r="1" />
+                  <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
+                </svg>
+                Masukkan ke Keranjang
+              </button>
             </div>
           );
         })}

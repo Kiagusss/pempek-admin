@@ -1,8 +1,24 @@
+'use client';
+
 import Image from 'next/image';
 import Section, { SectionHeader } from '@/components/ui/Section';
 import Badge from '@/components/ui/Badge';
-import { CURRENCY_FORMAT, WHATSAPP_NUMBER } from '@/constants';
+import { CURRENCY_FORMAT } from '@/constants';
 import type { Product } from '@/types';
+import type { CartItemInput } from '@/components/CartContext';
+
+// Kirim event add-to-cart via window (event bus).
+// Tidak bergantung pada React context — aman walau komponen di-SSR.
+function addToCart(product: Product) {
+  const item: CartItemInput = {
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    thumbnail: product.thumbnail,
+    stock: product.stock,
+  };
+  window.dispatchEvent(new CustomEvent('pempek:add-to-cart', { detail: item }));
+}
 
 export default function Produk({ products }: { products: Product[] }) {
   const activeProducts = products.filter((p) => p.status === 'active');
@@ -15,13 +31,8 @@ export default function Produk({ products }: { products: Product[] }) {
       />
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {activeProducts.map((product) => {
-          const waLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-            `Halo, saya ingin memesan ${product.name} (${CURRENCY_FORMAT.format(product.price)})`
-          )}`;
-
-          return (
-            <article
+        {activeProducts.map((product) => (
+          <article
               key={product.id}
               className="group overflow-hidden rounded-[var(--radius-xl)] bg-white transition-all duration-[var(--dur-slow)] hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5"
             >
@@ -63,21 +74,19 @@ export default function Produk({ products }: { products: Product[] }) {
                   </div>
                 </div>
 
-                <a
-                  href={waLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-[var(--radius-xl)] border border-[var(--color-paper-3)] py-2.5 text-sm font-semibold text-[var(--color-ink)] transition-all duration-[var(--dur-normal)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] active:scale-[0.98]"
+                <button
+                  onClick={() => addToCart(product)}
+                  disabled={product.stock <= 0}
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-[var(--radius-xl)] border border-[var(--color-paper-3)] py-2.5 text-sm font-semibold text-[var(--color-ink)] transition-all duration-[var(--dur-normal)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  Pesan
+                  {product.stock <= 0 ? 'Stok Habis' : 'Pesan'}
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                     <path d="M7 17L17 7M17 7H7M17 7v10" />
                   </svg>
-                </a>
+                </button>
               </div>
             </article>
-          );
-        })}
+        ))}
       </div>
     </Section>
   );
