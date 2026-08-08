@@ -11,7 +11,6 @@ import FAQ from '@/components/sections/FAQ';
 import Artikel from '@/components/sections/Artikel';
 import CTASection from '@/components/sections/CTASection';
 import VisitorTracker from '@/components/VisitorTracker';
-import HomeClient from '@/components/HomeClient';
 import { sbGet } from '@/lib/actions/supabase-crud';
 
 async function getData() {
@@ -31,7 +30,7 @@ export default async function Home() {
   const data = await getData();
 
   return (
-    <HomeClient>
+    <>
       <Navbar />
       <main>
         <Hero banners={data.banners} />
@@ -47,6 +46,6 @@ export default async function Home() {
       </main>
       <Footer />
       <VisitorTracker path="/" />
-    </HomeClient>
+    </>
   );
 }

@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans } from 'next/font/google';
 import { SITE_NAME, SITE_URL, DEFAULT_SEO } from '@/lib/seo';
+import { CartProvider } from '@/components/CartContext';
+import CartDrawer from '@/components/CartDrawer';
+import CartToast from '@/components/CartToast';
 import './globals.css';
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -56,7 +59,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" className={`${plusJakarta.variable} h-full`}>
-      <body className="min-h-full flex flex-col antialiased">{children}</body>
+      <body className="min-h-full flex flex-col antialiased">
+        <CartProvider>
+          {children}
+          <CartDrawer />
+          <CartToast />
+        </CartProvider>
+      </body>
     </html>
   );
 }
