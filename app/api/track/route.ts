@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { createHash } from 'crypto';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 
 // POST /api/track — dicatat dari landing page (sendBeacon).
@@ -14,14 +15,19 @@ export async function POST(request: Request) {
     // body tidak valid → tetap catat sebagai '/'
   }
 
-  const ip =
+  // Anonimisasi IP: hash + salt harian agar tidak menyimpan IP mentah (UU PDP).
+  // ponytail: tidak bisa cross-check IP per pengguna; upgrade: simpan hash permanen kalau butuh blokir abuse.
+  const rawIp =
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     request.headers.get('x-real-ip') ||
     '';
+  const ipHash = rawIp
+    ? createHash('sha256').update(rawIp + new Date().toISOString().slice(0, 10)).digest('hex').slice(0, 16)
+    : '';
 
   await supabaseAdmin
     .from('page_views')
-    .insert({ path, ip, user_agent: request.headers.get('user-agent')?.slice(0, 300) ?? '' });
+    .insert({ path, ip: ipHash, user_agent: request.headers.get('user-agent')?.slice(0, 300) ?? '' });
 
   return new NextResponse(null, { status: 204 });
 }

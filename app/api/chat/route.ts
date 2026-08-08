@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { buildSiteContext } from '@/lib/chat/context';
 import { TOOLS, executeTool } from '@/lib/chat/tools';
+import { rateLimit } from '@/lib/rate-limit';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -36,6 +37,12 @@ interface ChatMessage {
 }
 
 export async function POST(req: NextRequest) {
+  // Rate limit: publik 20 pesan/menit per IP, admin 60/menit (admin via PIN).
+  const ip =
+    req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    req.headers.get('x-real-ip') ||
+    'unknown';
+
   const body = (await req.json().catch(() => null)) as
     | { messages?: ChatMessage[]; admin?: boolean }
     | null;
@@ -45,6 +52,13 @@ export async function POST(req: NextRequest) {
   }
 
   const isAdmin = Boolean(body.admin);
+  const rl = rateLimit(isAdmin ? `chat-admin:${ip}` : `chat-pub:${ip}`, isAdmin ? 60 : 20, 60_000);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: `Terlalu banyak pesan. Coba lagi dalam ${rl.retryAfterSec} detik.` },
+      { status: 429 },
+    );
+  }
 
   if (isAdmin && (!PIN || !API_KEY)) {
     return NextResponse.json(

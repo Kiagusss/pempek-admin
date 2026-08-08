@@ -2,8 +2,15 @@ import { SignJWT, jwtVerify } from 'jose';
 
 // Pure JWT helpers — safe to import from Proxy (middleware runtime).
 // No next/headers, no server-only. Use in proxy.ts.
+// SESSION_SECRET WAJIB di-set di production (tanpa fallback) — fallback
+// hanya untuk dev agar bisa jalan tanpa setup.
 const secret = new TextEncoder().encode(
-  process.env.SESSION_SECRET ?? 'dev-only-secret-change-me',
+  process.env.SESSION_SECRET ??
+    (process.env.NODE_ENV === 'production'
+      ? (() => {
+          throw new Error('SESSION_SECRET wajib di-set di production!');
+        })()
+      : 'dev-only-secret-change-me'),
 );
 
 export async function signSession(): Promise<string> {

@@ -14,6 +14,7 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: DEFAULT_SEO.metaTitle,
     template: `%s | ${SITE_NAME}`,

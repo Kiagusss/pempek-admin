@@ -2,7 +2,7 @@ import type { NavLink } from '@/types';
 
 export const SITE_NAME = 'Pempek Palembang';
 export const SITE_TAGLINE = 'Pempek Asli Palembang';
-export const WHATSAPP_NUMBER = '6281234567890';
+export const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WA_NUMBER || '6281234567890';
 export const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Halo, saya ingin memesan Pempek Palembang.')}`;
 export const INSTAGRAM_URL = 'https://instagram.com/pempekpalembang';
 export const FACEBOOK_URL = 'https://facebook.com/pempekpalembang';
